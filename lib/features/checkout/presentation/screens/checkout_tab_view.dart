@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CheckoutMobileView extends ConsumerWidget {
-  const CheckoutMobileView({super.key});
+class CheckoutTabView extends ConsumerWidget {
+  const CheckoutTabView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Center(
-      child: Text('CheckoutMobileView Layout'),
+    return Center(
+      child: Text('CheckoutTabView'),
     );
   }
 }

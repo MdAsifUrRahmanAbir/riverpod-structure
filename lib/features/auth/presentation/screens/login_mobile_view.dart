@@ -6,8 +6,8 @@ class LoginMobileView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Center(
-      child: Text('LoginMobileView Layout'),
+    return Center(
+      child: Text('LoginMobileView'),
     );
   }
 }

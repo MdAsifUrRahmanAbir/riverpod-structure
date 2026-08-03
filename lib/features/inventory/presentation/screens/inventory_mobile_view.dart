@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ProductTabView extends ConsumerWidget {
-  const ProductTabView({super.key});
+class InventoryMobileView extends ConsumerWidget {
+  const InventoryMobileView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Center(
-      child: Text('ProductTabView Layout'),
+    return Center(
+      child: Text('Inventory Mobile View'),
     );
   }
 }

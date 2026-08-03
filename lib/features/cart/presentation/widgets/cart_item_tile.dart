@@ -6,8 +6,8 @@ class CartItemTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const Center(
-      child: Text('CartItemTile Layout'),
+    return Center(
+      child: Text('CartItemTile'),
     );
   }
 }

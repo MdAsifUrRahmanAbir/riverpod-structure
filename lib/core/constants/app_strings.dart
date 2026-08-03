@@ -1,18 +1,16 @@
 class AppStrings {
-  AppStrings._(); // Private constructor to prevent instantiation
+  AppStrings._();
 
-  // General App Info
   static const String appName = 'POS App';
-
-  // Auth & Session
+  static const String welcomeTitle = 'Welcome to POS App';
+  static const String welcomeSubtitle = 'Manage your sales, products, and receipts seamlessly.';
+  static const String getStarted = 'Get Started';
   static const String login = 'Login';
   static const String logout = 'Logout';
-
-  // Navigation & Features
   static const String products = 'Products';
   static const String cart = 'Cart';
   static const String checkout = 'Checkout';
-
-  // Common Messages & Errors
+  static const String skip = 'Skip';
+  static const String next = 'Next';
   static const String errorOccurred = 'Something went wrong. Please try again.';
 }

@@ -1,3 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomDialog { static void show(BuildContext context) {} }
+class CustomDialog {
+  CustomDialog._();
+  static void show(BuildContext context) {}
+}

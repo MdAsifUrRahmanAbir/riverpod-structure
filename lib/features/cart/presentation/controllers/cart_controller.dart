@@ -1,20 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:untitled2/features/cart/data/models/cart_item_model.dart';
 
-class CartController extends Notifier<AsyncValue<void>> {
+class CartController extends Notifier<List<CartItemModel>> {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
-
-  Future<void> addItem() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      // TODO: Call API or repository
-    });
-  }
+  List<CartItemModel> build() => [];
 }
 
-final cartControllerProvider =
-NotifierProvider<CartController, AsyncValue<void>>(
-  CartController.new,
-);
+final cartControllerProvider = NotifierProvider<CartController, List<CartItemModel>>(CartController.new);

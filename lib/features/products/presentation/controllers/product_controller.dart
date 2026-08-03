@@ -1,27 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:untitled2/features/products/data/models/product_model.dart';
 
-class ProductController extends Notifier<AsyncValue<void>> {
+class ProductController extends Notifier<AsyncValue<List<ProductModel>>> {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
-
-  // প্রোডাক্ট ফেচ বা কোনো অ্যাকশন ট্রিগার করার মেথড
-  Future<void> fetchProducts() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      // TODO: Call your product repository here
-      // await ref.read(productRepositoryProvider).getProducts();
-    });
-  }
-
-  // স্টেট রিসেট করার জন্য
-  void reset() {
-    state = const AsyncValue.data(null);
-  }
+  AsyncValue<List<ProductModel>> build() => const AsyncValue.data([]);
 }
 
-final productControllerProvider =
-NotifierProvider<ProductController, AsyncValue<void>>(
-  ProductController.new,
-);
+final productControllerProvider = NotifierProvider<ProductController, AsyncValue<List<ProductModel>>>(ProductController.new);

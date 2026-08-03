@@ -1,3 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomAlertDialog { static void show(BuildContext context) {} }
+class CustomAlertDialog {
+  CustomAlertDialog._();
+  static void show(BuildContext context) {}
+}

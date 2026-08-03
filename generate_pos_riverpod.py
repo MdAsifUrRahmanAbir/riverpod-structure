@@ -27,36 +27,48 @@ structure = {
         ]
     },
     "features": {
+        "onboarding": {
+            "data": ["models/onboarding_model.dart"],
+            "presentation": {
+                "controllers": ["onboarding_controller.dart"],
+                "screens": [
+                    "splash_screen.dart",
+                    "onboarding_screen.dart",
+                    "welcome_screen.dart"
+                ],
+                "widgets": ["onboarding_item_widget.dart"]
+            }
+        },
         "auth": {
             "data": ["models/user_model.dart", "repositories/auth_repository.dart"],
             "presentation": {
                 "controllers": ["auth_controller.dart"],
-                "screens": ["login_screen.dart"],
-                "widgets": ["login_mobile_view.dart", "login_tab_view.dart"]
+                "screens": ["login_screen.dart", "login_mobile_view.dart", "login_tab_view.dart"],
+                "widgets": []
             }
         },
         "products": {
             "data": ["models/product_model.dart", "repositories/product_repository.dart"],
             "presentation": {
                 "controllers": ["product_controller.dart"],
-                "screens": ["product_list_screen.dart"],
-                "widgets": ["product_list_mobile_view.dart", "product_list_tab_view.dart", "product_card_item.dart"]
+                "screens": ["product_list_screen.dart", "product_list_mobile_view.dart", "product_list_tab_view.dart"],
+                "widgets": ["product_card_item.dart"]
             }
         },
         "cart": {
             "data": ["models/cart_item_model.dart"],
             "presentation": {
                 "controllers": ["cart_controller.dart"],
-                "screens": ["cart_screen.dart"],
-                "widgets": ["cart_mobile_view.dart", "cart_tab_view.dart", "cart_item_tile.dart"]
+                "screens": ["cart_screen.dart", "cart_mobile_view.dart", "cart_tab_view.dart"],
+                "widgets": ["cart_item_tile.dart"]
             }
         },
         "checkout": {
             "data": ["models/invoice_model.dart", "repositories/checkout_repository.dart"],
             "presentation": {
                 "controllers": ["checkout_controller.dart"],
-                "screens": ["checkout_screen.dart"],
-                "widgets": ["checkout_mobile_view.dart", "checkout_tab_view.dart", "receipt_preview.dart"]
+                "screens": ["checkout_screen.dart", "checkout_mobile_view.dart", "checkout_tab_view.dart"],
+                "widgets": ["receipt_preview.dart"]
             }
         }
     },
@@ -64,10 +76,9 @@ structure = {
 }
 
 # =========================================================
-# System Templates (DI, Network, Endpoints, Router)
+# System Templates (Using safe token replacement)
 # =========================================================
 
-# 1. API Endpoints
 API_ENDPOINTS_TEMPLATE = """class ApiEndpoints {
   static const String baseUrl = "https://api.yourposapp.com/v1";
 
@@ -85,11 +96,10 @@ API_ENDPOINTS_TEMPLATE = """class ApiEndpoints {
 }
 """
 
-# 2. API Client — single clean provider, no duplication
 API_CLIENT_TEMPLATE = """import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/constants/api_endpoints.dart';
-import 'package:%(pkg)s/core/network/api_exception.dart';
+import 'package:__PACKAGE_NAME__/core/constants/api_endpoints.dart';
+import 'package:__PACKAGE_NAME__/core/network/api_exception.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 
@@ -148,9 +158,8 @@ class ApiClient {
     }
   }
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
-# 3. API Exception
 API_EXCEPTION_TEMPLATE = """import 'package:dio/dio.dart';
 
 class ApiException implements Exception {
@@ -182,16 +191,16 @@ class ApiException implements Exception {
 }
 """
 
-# 4. DI Container — references api_client provider (no re-declaration)
 DI_CONTAINER_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/network/api_client.dart';
+import 'package:__PACKAGE_NAME__/core/network/api_client.dart';
 
-// Re-export providers for convenience
-export 'package:%(pkg)s/core/network/api_client.dart' show apiClientProvider;
-""" % {"pkg": PACKAGE_NAME}
+export 'package:__PACKAGE_NAME__/core/network/api_client.dart' show apiClientProvider;
+"""
 
-# 5. Route Names
 ROUTE_NAMES_TEMPLATE = """class RouteNames {
+  static const String splash = '/';
+  static const String onboarding = '/onboarding';
+  static const String welcome = '/welcome';
   static const String login = '/login';
   static const String products = '/products';
   static const String cart = '/cart';
@@ -199,20 +208,34 @@ ROUTE_NAMES_TEMPLATE = """class RouteNames {
 }
 """
 
-# 6. App Router (GoRouter) — package imports
 APP_ROUTER_TEMPLATE = """import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:%(pkg)s/routes/route_names.dart';
-import 'package:%(pkg)s/features/auth/presentation/screens/login_screen.dart';
-import 'package:%(pkg)s/features/products/presentation/screens/product_list_screen.dart';
-import 'package:%(pkg)s/features/cart/presentation/screens/cart_screen.dart';
-import 'package:%(pkg)s/features/checkout/presentation/screens/checkout_screen.dart';
+import 'package:__PACKAGE_NAME__/routes/route_names.dart';
+import 'package:__PACKAGE_NAME__/features/onboarding/presentation/screens/splash_screen.dart';
+import 'package:__PACKAGE_NAME__/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:__PACKAGE_NAME__/features/onboarding/presentation/screens/welcome_screen.dart';
+import 'package:__PACKAGE_NAME__/features/auth/presentation/screens/login_screen.dart';
+import 'package:__PACKAGE_NAME__/features/products/presentation/screens/product_list_screen.dart';
+import 'package:__PACKAGE_NAME__/features/cart/presentation/screens/cart_screen.dart';
+import 'package:__PACKAGE_NAME__/features/checkout/presentation/screens/checkout_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: RouteNames.products,
+    initialLocation: RouteNames.splash,
     routes: [
+      GoRoute(
+        path: RouteNames.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.welcome,
+        builder: (context, state) => const WelcomeScreen(),
+      ),
       GoRoute(
         path: RouteNames.login,
         builder: (context, state) => const LoginScreen(),
@@ -232,144 +255,509 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-""" % {"pkg": PACKAGE_NAME}
+"""
 
-# 7. App Colors
 APP_COLORS_TEMPLATE = """import 'package:flutter/material.dart';
 
 class AppColors {
+  AppColors._();
+
   static const Color primary = Color(0xFF6C63FF);
   static const Color primaryDark = Color(0xFF4B44CC);
   static const Color primaryLight = Color(0xFFEAE9FF);
+
   static const Color accent = Color(0xFF00C896);
+  static const Color accentLight = Color(0xFFE6F9F5);
+
   static const Color background = Color(0xFFF5F5F7);
   static const Color surface = Color(0xFFFFFFFF);
+  static const Color surfaceDark = Color(0xFF1C1C1E);
+
   static const Color textPrimary = Color(0xFF1C1C1E);
   static const Color textSecondary = Color(0xFF636366);
   static const Color textHint = Color(0xFFAEAEB2);
+  static const Color textWhite = Color(0xFFFFFFFF);
+
   static const Color success = Color(0xFF34C759);
   static const Color warning = Color(0xFFFF9F0A);
   static const Color error = Color(0xFFFF3B30);
   static const Color info = Color(0xFF007AFF);
+
   static const Color border = Color(0xFFE5E5EA);
+  static const Color divider = Color(0xFFF2F2F7);
+
+  static const Color shimmerBase = Color(0xFFE0E0E0);
+  static const Color shimmerHighlight = Color(0xFFF5F5F5);
 }
 """
 
-# 8. App Strings
 APP_STRINGS_TEMPLATE = """class AppStrings {
+  AppStrings._();
+
   static const String appName = 'POS App';
+  static const String welcomeTitle = 'Welcome to POS App';
+  static const String welcomeSubtitle = 'Manage your sales, products, and receipts seamlessly.';
+  static const String getStarted = 'Get Started';
   static const String login = 'Login';
   static const String logout = 'Logout';
   static const String products = 'Products';
   static const String cart = 'Cart';
   static const String checkout = 'Checkout';
+  static const String skip = 'Skip';
+  static const String next = 'Next';
   static const String errorOccurred = 'Something went wrong. Please try again.';
 }
 """
 
-# 9. App Sizes
 APP_SIZES_TEMPLATE = """class AppSizes {
-  static const double xs = 4;
-  static const double sm = 8;
-  static const double md = 16;
-  static const double lg = 24;
-  static const double xl = 32;
-  static const double radiusMd = 12;
-  static const double radiusLg = 16;
-  static const double fontMd = 15;
-  static const double fontLg = 17;
-  static const double buttonHeight = 52;
-  static const double mobileBreakpoint = 650;
+  AppSizes._();
+
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 16.0;
+  static const double lg = 24.0;
+  static const double xl = 32.0;
+  static const double xxl = 48.0;
+
+  static const double radiusSm = 8.0;
+  static const double radiusMd = 12.0;
+  static const double radiusLg = 16.0;
+  static const double radiusXl = 24.0;
+  static const double radiusFull = 100.0;
+
+  static const double iconSm = 16.0;
+  static const double iconMd = 24.0;
+  static const double iconLg = 32.0;
+
+  static const double fontXs = 11.0;
+  static const double fontSm = 13.0;
+  static const double fontMd = 15.0;
+  static const double fontLg = 17.0;
+  static const double fontXl = 20.0;
+  static const double fontXxl = 24.0;
+  static const double fontDisplay = 32.0;
+
+  static const double buttonHeight = 52.0;
+  static const double inputHeight = 52.0;
+  static const double appBarHeight = 56.0;
+  static const double bottomNavBarHeight = 64.0;
+
+  static const double mobileBreakpoint = 650.0;
+  static const double tabletBreakpoint = 1100.0;
 }
 """
 
-# 10. App Theme
 APP_THEME_TEMPLATE = """import 'package:flutter/material.dart';
-import 'package:%(pkg)s/core/constants/app_colors.dart';
-import 'package:%(pkg)s/core/constants/app_sizes.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_colors.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_sizes.dart';
 
 class AppTheme {
+  AppTheme._();
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        primary: AppColors.primary,
+        secondary: AppColors.accent,
+        surface: AppColors.surface,
+        error: AppColors.error,
+        brightness: Brightness.light,
+      ),
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0.5,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: AppSizes.fontLg,
+          fontWeight: FontWeight.w600,
+        ),
       ),
-    );
-  }
-}
-""" % {"pkg": PACKAGE_NAME}
-
-# 11. Screen Template
-SCREEN_TEMPLATE = """import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/utils/responsive.dart';
-import 'package:%(pkg)s/features/{feature_path}/presentation/widgets/{base_name}_mobile_view.dart';
-import 'package:%(pkg)s/features/{feature_path}/presentation/widgets/{base_name}_tab_view.dart';
-
-class {classname} extends ConsumerWidget {
-  const {classname}({{super.key}});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {{
-    return Scaffold(
-      body: Responsive(
-        mobile: {classname}MobileView(),
-        tablet: {classname}TabView(),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontSize: AppSizes.fontDisplay,
+          fontWeight: FontWeight.bold,
+          color: AppColors.textPrimary,
+        ),
+        titleLarge: TextStyle(
+          fontSize: AppSizes.fontXl,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: AppSizes.fontLg,
+          color: AppColors.textPrimary,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: AppSizes.fontMd,
+          color: AppColors.textPrimary,
+        ),
+        bodySmall: TextStyle(
+          fontSize: AppSizes.fontSm,
+          color: AppColors.textSecondary,
+        ),
       ),
-    );
-  }}
-}
-""" % {"pkg": PACKAGE_NAME}
-
-# 12. View Widgets Template
-VIEW_WIDGET_TEMPLATE = """import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-class {classname} extends ConsumerWidget {
-  const {classname}({{super.key}});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return const Center(
-      child: Text('{classname}'),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          ),
+          textStyle: const TextStyle(
+            fontSize: AppSizes.fontMd,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }
 """
 
-# 13. Repository Template
-REPOSITORY_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/network/api_client.dart';
+# =========================================================
+# New Onboarding Feature Templates
+# =========================================================
 
-final {provider_name} = Provider<{classname}>((ref) {
-  return {classname}(ref.watch(apiClientProvider));
+ONBOARDING_MODEL_TEMPLATE = """class OnboardingModel {
+  final String title;
+  final String description;
+  final String imagePath;
+
+  const OnboardingModel({
+    required this.title,
+    required this.description,
+    required this.imagePath,
+  });
+}
+"""
+
+ONBOARDING_CONTROLLER_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:__PACKAGE_NAME__/features/onboarding/data/models/onboarding_model.dart';
+
+class OnboardingController extends Notifier<List<OnboardingModel>> {
+  @override
+  List<OnboardingModel> build() {
+    return const [
+      OnboardingModel(
+        title: 'Manage Inventory',
+        description: 'Track stock and product availability in real time.',
+        imagePath: 'assets/images/onboarding1.png',
+      ),
+      OnboardingModel(
+        title: 'Fast Checkout',
+        description: 'Process transactions efficiently and print receipts.',
+        imagePath: 'assets/images/onboarding2.png',
+      ),
+      OnboardingModel(
+        title: 'Business Analytics',
+        description: 'Gain valuable insights into daily sales and growth.',
+        imagePath: 'assets/images/onboarding3.png',
+      ),
+    ];
+  }
+}
+
+final onboardingControllerProvider =
+    NotifierProvider<OnboardingController, List<OnboardingModel>>(OnboardingController.new);
+"""
+
+SPLASH_SCREEN_TEMPLATE = """import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_colors.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_strings.dart';
+import 'package:__PACKAGE_NAME__/routes/route_names.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        context.go(RouteNames.onboarding);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: AppColors.primary,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.storefront, size: 80, color: Colors.white),
+            SizedBox(height: 16),
+            Text(
+              AppStrings.appName,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+"""
+
+ONBOARDING_SCREEN_TEMPLATE = """import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_colors.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_sizes.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_strings.dart';
+import 'package:__PACKAGE_NAME__/features/onboarding/presentation/controllers/onboarding_controller.dart';
+import 'package:__PACKAGE_NAME__/routes/route_names.dart';
+
+class OnboardingScreen extends ConsumerStatefulWidget {
+  const OnboardingScreen({super.key});
+
+  @override
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+
+  void _onFinish() {
+    context.go(RouteNames.welcome);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final onboardingList = ref.watch(onboardingControllerProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          TextButton(
+            onPressed: _onFinish,
+            child: const Text(AppStrings.skip),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: onboardingList.length,
+                onPageChanged: (index) {
+                  setState(() => _currentIndex = index);
+                },
+                itemBuilder: (context, index) {
+                  final item = onboardingList[index];
+                  return Padding(
+                    padding: const EdgeInsets.all(AppSizes.lg),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.touch_app, size: 100, color: AppColors.primary),
+                        const SizedBox(height: AppSizes.xl),
+                        Text(
+                          item.title,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppSizes.md),
+                        Text(
+                          item.description,
+                          style: Theme.of(context).textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                onboardingList.length,
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  height: 8,
+                  width: _currentIndex == index ? 24 : 8,
+                  decoration: BoxDecoration(
+                    color: _currentIndex == index ? AppColors.primary : AppColors.border,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.lg),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_currentIndex == onboardingList.length - 1) {
+                    _onFinish();
+                  } else {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                child: Text(
+                  _currentIndex == onboardingList.length - 1
+                      ? AppStrings.getStarted
+                      : AppStrings.next,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+"""
+
+WELCOME_SCREEN_TEMPLATE = """import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_colors.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_sizes.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_strings.dart';
+import 'package:__PACKAGE_NAME__/routes/route_names.dart';
+
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.lg),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Spacer(),
+              const Icon(Icons.rocket_launch, size: 90, color: AppColors.primary),
+              const SizedBox(height: AppSizes.lg),
+              Text(
+                AppStrings.welcomeTitle,
+                style: Theme.of(context).textTheme.displayLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSizes.md),
+              Text(
+                AppStrings.welcomeSubtitle,
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () => context.go(RouteNames.login),
+                child: const Text(AppStrings.login),
+              ),
+              const SizedBox(height: AppSizes.md),
+              OutlinedButton(
+                onPressed: () => context.go(RouteNames.products),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                  ),
+                ),
+                child: const Text('Continue as Guest'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+"""
+
+SCREEN_TEMPLATE = """import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:__PACKAGE_NAME__/core/utils/responsive.dart';
+import '__BASE_NAME___mobile_view.dart';
+import '__BASE_NAME___tab_view.dart';
+
+class __CLASSNAME__ extends ConsumerWidget {
+  const __CLASSNAME__({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      body: Responsive(
+        mobile: const __VIEW_CLASSNAME__MobileView(),
+        tablet: const __VIEW_CLASSNAME__TabView(),
+      ),
+    );
+  }
+}
+"""
+
+VIEW_WIDGET_TEMPLATE = """import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class __CLASSNAME__ extends ConsumerWidget {
+  const __CLASSNAME__({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Text('__CLASSNAME__'),
+    );
+  }
+}
+"""
+
+REPOSITORY_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:__PACKAGE_NAME__/core/network/api_client.dart';
+
+final __PROVIDER_NAME__ = Provider<__CLASSNAME__>((ref) {
+  return __CLASSNAME__(ref.watch(apiClientProvider));
 });
 
-class {classname} {
+class __CLASSNAME__ {
   final ApiClient _apiClient;
-  {classname}(this._apiClient);
+  __CLASSNAME__(this._apiClient);
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
-# 14. Controller Template
 CONTROLLER_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class {classname} extends Notifier<AsyncValue<void>> {
+class __CLASSNAME__ extends Notifier<AsyncValue<void>> {
   @override
   AsyncValue<void> build() {
     return const AsyncValue.data(null);
   }
 }
 
-final {provider_name} = NotifierProvider<{classname}, AsyncValue<void>>({classname}.new);
+final __PROVIDER_NAME__ = NotifierProvider<__CLASSNAME__, AsyncValue<void>>(__CLASSNAME__.new);
 """
 
-# 15. Model Templates
 USER_MODEL_TEMPLATE = """class UserModel {
   final String id;
   final String name;
@@ -408,7 +796,7 @@ PRODUCT_MODEL_TEMPLATE = """class ProductModel {
 }
 """
 
-CART_ITEM_MODEL_TEMPLATE = """import 'package:%(pkg)s/features/products/data/models/product_model.dart';
+CART_ITEM_MODEL_TEMPLATE = """import 'package:__PACKAGE_NAME__/features/products/data/models/product_model.dart';
 
 class CartItemModel {
   final ProductModel product;
@@ -425,9 +813,9 @@ class CartItemModel {
 
   Map<String, dynamic> toJson() => {'product': product.toJson(), 'quantity': quantity};
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
-INVOICE_MODEL_TEMPLATE = """import 'package:%(pkg)s/features/cart/data/models/cart_item_model.dart';
+INVOICE_MODEL_TEMPLATE = """import 'package:__PACKAGE_NAME__/features/cart/data/models/cart_item_model.dart';
 
 class InvoiceModel {
   final String id;
@@ -450,12 +838,11 @@ class InvoiceModel {
     'total': total,
   };
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
-# 16-22 are specific controllers/repos which we will keep mostly as is but fix imports
 AUTH_REPOSITORY_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/network/api_client.dart';
-import 'package:%(pkg)s/features/auth/data/models/user_model.dart';
+import 'package:__PACKAGE_NAME__/core/network/api_client.dart';
+import 'package:__PACKAGE_NAME__/features/auth/data/models/user_model.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository(ref.watch(apiClientProvider)));
 
@@ -467,10 +854,10 @@ class AuthRepository {
     return UserModel(id: '1', name: 'User', email: email);
   }
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
 AUTH_CONTROLLER_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/features/auth/data/models/user_model.dart';
+import 'package:__PACKAGE_NAME__/features/auth/data/models/user_model.dart';
 
 class AuthController extends Notifier<AsyncValue<UserModel?>> {
   @override
@@ -478,11 +865,10 @@ class AuthController extends Notifier<AsyncValue<UserModel?>> {
 }
 
 final authControllerProvider = NotifierProvider<AuthController, AsyncValue<UserModel?>>(AuthController.new);
-""" % {"pkg": PACKAGE_NAME}
+"""
 
 PRODUCT_REPOSITORY_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/network/api_client.dart';
-import 'package:%(pkg)s/features/products/data/models/product_model.dart';
+import 'package:__PACKAGE_NAME__/core/network/api_client.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) => ProductRepository(ref.watch(apiClientProvider)));
 
@@ -490,10 +876,10 @@ class ProductRepository {
   final ApiClient _apiClient;
   ProductRepository(this._apiClient);
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
 PRODUCT_CONTROLLER_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/features/products/data/models/product_model.dart';
+import 'package:__PACKAGE_NAME__/features/products/data/models/product_model.dart';
 
 class ProductController extends Notifier<AsyncValue<List<ProductModel>>> {
   @override
@@ -501,10 +887,10 @@ class ProductController extends Notifier<AsyncValue<List<ProductModel>>> {
 }
 
 final productControllerProvider = NotifierProvider<ProductController, AsyncValue<List<ProductModel>>>(ProductController.new);
-""" % {"pkg": PACKAGE_NAME}
+"""
 
 CART_CONTROLLER_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/features/cart/data/models/cart_item_model.dart';
+import 'package:__PACKAGE_NAME__/features/cart/data/models/cart_item_model.dart';
 
 class CartController extends Notifier<List<CartItemModel>> {
   @override
@@ -512,10 +898,10 @@ class CartController extends Notifier<List<CartItemModel>> {
 }
 
 final cartControllerProvider = NotifierProvider<CartController, List<CartItemModel>>(CartController.new);
-""" % {"pkg": PACKAGE_NAME}
+"""
 
 CHECKOUT_REPOSITORY_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/network/api_client.dart';
+import 'package:__PACKAGE_NAME__/core/network/api_client.dart';
 
 final checkoutRepositoryProvider = Provider<CheckoutRepository>((ref) => CheckoutRepository(ref.watch(apiClientProvider)));
 
@@ -523,10 +909,10 @@ class CheckoutRepository {
   final ApiClient _apiClient;
   CheckoutRepository(this._apiClient);
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
 CHECKOUT_CONTROLLER_TEMPLATE = """import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/features/checkout/data/models/invoice_model.dart';
+import 'package:__PACKAGE_NAME__/features/checkout/data/models/invoice_model.dart';
 
 class CheckoutController extends Notifier<AsyncValue<InvoiceModel?>> {
   @override
@@ -534,26 +920,34 @@ class CheckoutController extends Notifier<AsyncValue<InvoiceModel?>> {
 }
 
 final checkoutControllerProvider = NotifierProvider<CheckoutController, AsyncValue<InvoiceModel?>>(CheckoutController.new);
-""" % {"pkg": PACKAGE_NAME}
+"""
 
-# 23-24
 CURRENCY_FORMATTER_TEMPLATE = """class CurrencyFormatter {
-  static String format(double amount) => '\$${amount.toStringAsFixed(2)}';
+  CurrencyFormatter._();
+
+  static String format(double amount) => '\\${amount.toStringAsFixed(2)}';
 }
 """
 
 DATE_FORMATTER_TEMPLATE = """class DateFormatter {
+  DateFormatter._();
+
   static String format(DateTime date) => date.toIso8601String();
 }
 """
 
 MAIN_DART_TEMPLATE = """import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:%(pkg)s/core/theme/app_theme.dart';
-import 'package:%(pkg)s/routes/app_router.dart';
+import 'package:__PACKAGE_NAME__/core/theme/app_theme.dart';
+import 'package:__PACKAGE_NAME__/routes/app_router.dart';
 
 void main() {
-  runApp(const ProviderScope(child: PosApp()));
+  WidgetsBinding.instance.addPostFrameCallback((_) {});
+  runApp(
+    const ProviderScope(
+      child: PosApp(),
+    ),
+  );
 }
 
 class PosApp extends ConsumerWidget {
@@ -562,29 +956,28 @@ class PosApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+
     return MaterialApp.router(
-      title: 'POS App',
+      title: 'POS System',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: router,
     );
   }
 }
-""" % {"pkg": PACKAGE_NAME}
+"""
 
-# =========================================================
-# Common Widget Templates
-# =========================================================
 COMMON_WIDGET_TEMPLATES = {
-    "primary_button.dart": "import 'package:flutter/material.dart';\n\nclass PrimaryButton extends StatelessWidget { const PrimaryButton({super.key}); @override Widget build(BuildContext context) => const ElevatedButton(onPressed: null, child: Text('Button')); }",
-    "primary_input_field.dart": "import 'package:flutter/material.dart';\n\nclass PrimaryInputField extends StatelessWidget { const PrimaryInputField({super.key}); @override Widget build(BuildContext context) => const TextField(); }",
-    "primary_checkbox.dart": "import 'package:flutter/material.dart';\n\nclass PrimaryCheckbox extends StatelessWidget { const PrimaryCheckbox({super.key}); @override Widget build(BuildContext context) => const Checkbox(value: false, onChanged: null); }",
-    "custom_loader.dart": "import 'package:flutter/material.dart';\n\nclass CustomLoader extends StatelessWidget { const CustomLoader({super.key}); @override Widget build(BuildContext context) => const CircularProgressIndicator(); }",
-    "custom_shimmer.dart": "import 'package:flutter/material.dart';\n\nclass CustomShimmer extends StatelessWidget { const CustomShimmer({super.key}); @override Widget build(BuildContext context) => const SizedBox(); }",
-    "custom_snackbar.dart": "import 'package:flutter/material.dart';\n\nclass CustomSnackbar { static void show(BuildContext context, String message) {} }",
-    "custom_dialog.dart": "import 'package:flutter/material.dart';\n\nclass CustomDialog { static void show(BuildContext context) {} }",
-    "custom_alert_dialog.dart": "import 'package:flutter/material.dart';\n\nclass CustomAlertDialog { static void show(BuildContext context) {} }",
+    "primary_button.dart": "import 'package:flutter/material.dart';\n\nclass PrimaryButton extends StatelessWidget {\n  const PrimaryButton({super.key});\n\n  @override\n  Widget build(BuildContext context) => const ElevatedButton(onPressed: null, child: Text('Button'));\n}",
+    "primary_input_field.dart": "import 'package:flutter/material.dart';\n\nclass PrimaryInputField extends StatelessWidget {\n  const PrimaryInputField({super.key});\n\n  @override\n  Widget build(BuildContext context) => const TextField();\n}",
+    "primary_checkbox.dart": "import 'package:flutter/material.dart';\n\nclass PrimaryCheckbox extends StatelessWidget {\n  const PrimaryCheckbox({super.key});\n\n  @override\n  Widget build(BuildContext context) => const Checkbox(value: false, onChanged: null);\n}",
+    "custom_loader.dart": "import 'package:flutter/material.dart';\n\nclass CustomLoader extends StatelessWidget {\n  const CustomLoader({super.key});\n\n  @override\n  Widget build(BuildContext context) => const CircularProgressIndicator();\n}",
+    "custom_shimmer.dart": "import 'package:flutter/material.dart';\n\nclass CustomShimmer extends StatelessWidget {\n  const CustomShimmer({super.key});\n\n  @override\n  Widget build(BuildContext context) => const SizedBox();\n}",
+    "custom_snackbar.dart": "import 'package:flutter/material.dart';\n\nclass CustomSnackbar {\n  CustomSnackbar._();\n  static void show(BuildContext context, String message) {}\n}",
+    "custom_dialog.dart": "import 'package:flutter/material.dart';\n\nclass CustomDialog {\n  CustomDialog._();\n  static void show(BuildContext context) {}\n}",
+    "custom_alert_dialog.dart": "import 'package:flutter/material.dart';\n\nclass CustomAlertDialog {\n  CustomAlertDialog._();\n  static void show(BuildContext context) {}\n}",
     "responsive.dart": """import 'package:flutter/material.dart';
-import 'package:%(pkg)s/core/constants/app_sizes.dart';
+import 'package:__PACKAGE_NAME__/core/constants/app_sizes.dart';
 
 class Responsive extends StatelessWidget {
   final Widget mobile;
@@ -599,10 +992,15 @@ class Responsive extends StatelessWidget {
     });
   }
 }
-""" % {"pkg": PACKAGE_NAME},
+""",
 }
 
 SPECIFIC_FILE_TEMPLATES = {
+    "onboarding_model.dart": ONBOARDING_MODEL_TEMPLATE,
+    "onboarding_controller.dart": ONBOARDING_CONTROLLER_TEMPLATE,
+    "splash_screen.dart": SPLASH_SCREEN_TEMPLATE,
+    "onboarding_screen.dart": ONBOARDING_SCREEN_TEMPLATE,
+    "welcome_screen.dart": WELCOME_SCREEN_TEMPLATE,
     "user_model.dart": USER_MODEL_TEMPLATE,
     "product_model.dart": PRODUCT_MODEL_TEMPLATE,
     "cart_item_model.dart": CART_ITEM_MODEL_TEMPLATE,
@@ -635,13 +1033,16 @@ def format_class_name(filename):
     base_name = filename.replace(".dart", "")
     return "".join([word.capitalize() for word in base_name.split("_")])
 
-def infer_feature_path(file_path):
-    parts = file_path.replace("\\", "/").split("/")
-    if "features" in parts:
-        idx = parts.index("features")
-        if idx + 1 < len(parts):
-            return parts[idx + 1]
-    return ""
+def apply_template_replacements(content, classname="", base_name="", view_classname=""):
+    provider_name = classname[0].lower() + classname[1:] + "Provider" if classname else ""
+    return (
+        content
+        .replace("__PACKAGE_NAME__", PACKAGE_NAME)
+        .replace("__CLASSNAME__", classname)
+        .replace("__BASE_NAME__", base_name)
+        .replace("__VIEW_CLASSNAME__", view_classname)
+        .replace("__PROVIDER_NAME__", provider_name)
+    )
 
 def create_file(file_path, overwrite=False):
     if os.path.exists(file_path) and not overwrite:
@@ -651,7 +1052,6 @@ def create_file(file_path, overwrite=False):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     filename = os.path.basename(file_path)
     classname = format_class_name(filename)
-    feature_path = infer_feature_path(file_path)
 
     if filename in SPECIFIC_FILE_TEMPLATES:
         content = SPECIFIC_FILE_TEMPLATES[filename]
@@ -659,27 +1059,26 @@ def create_file(file_path, overwrite=False):
         content = COMMON_WIDGET_TEMPLATES[filename]
     elif filename.endswith("_screen.dart"):
         base_name = filename.replace("_screen.dart", "")
-        content = (
-            SCREEN_TEMPLATE
-            .replace("{classname}", classname)
-            .replace("{feature_path}", feature_path)
-            .replace("{base_name}", base_name)
-        )
+        view_classname = "".join([w.capitalize() for w in base_name.split("_")])
+        content = SCREEN_TEMPLATE
+        content = apply_template_replacements(content, classname=classname, base_name=base_name, view_classname=view_classname)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"  ✅ Written: {file_path}")
+        return
     elif any(filename.endswith(s) for s in ["_view.dart", "_widget.dart", "_item.dart", "_preview.dart", "_tile.dart", "_card_item.dart"]):
-        content = VIEW_WIDGET_TEMPLATE.format(classname=classname)
+        content = VIEW_WIDGET_TEMPLATE
     elif "repository.dart" in filename:
-        provider_name = classname[0].lower() + classname[1:] + "Provider"
-        content = REPOSITORY_TEMPLATE.format(classname=classname, provider_name=provider_name)
+        content = REPOSITORY_TEMPLATE
     elif "controller.dart" in filename:
-        provider_name = classname[0].lower() + classname[1:] + "Provider"
-        content = CONTROLLER_TEMPLATE.format(classname=classname, provider_name=provider_name)
+        content = CONTROLLER_TEMPLATE
     else:
         content = f"// TODO: Implement {filename}\n"
 
+    content = apply_template_replacements(content, classname=classname)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
-    action = "Updated" if os.path.exists(file_path) else "Created"
-    print(f"  ✅ {action}: {file_path}")
+    print(f"  ✅ Written: {file_path}")
 
 def generate_structure(base_path, struct_dict, overwrite=False):
     for key, val in struct_dict.items():
@@ -691,9 +1090,11 @@ def generate_structure(base_path, struct_dict, overwrite=False):
                 create_file(os.path.join(current_path, file), overwrite=overwrite)
 
 if __name__ == "__main__":
-    overwrite = "--overwrite" in sys.argv or "-o" in sys.argv or True # Default to True for this fix session
-    print("🚀 Generating POS Clean Architecture...")
+    overwrite = "--overwrite" in sys.argv or "-o" in sys.argv or True
+    print("🚀 Generating POS Clean Architecture with Onboarding Flow...")
     generate_structure(LIB_PATH, structure, overwrite=overwrite)
+
+    main_content = apply_template_replacements(MAIN_DART_TEMPLATE)
     with open(os.path.join(LIB_PATH, "main.dart"), "w", encoding="utf-8") as f:
-        f.write(MAIN_DART_TEMPLATE)
+        f.write(main_content)
     print("\n🎉 Done!")
