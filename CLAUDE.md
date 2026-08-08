@@ -16,7 +16,7 @@ lib/
 ├── features/            # Feature-first modular structure
 │   ├── auth/            # (models, repositories, controllers, screens, widgets)
 │   ├── cart/            # (models, controllers, screens, widgets)
-│   ├── checkout/        # (repositories, controllers, screens, widgets)
+│   ├── checkout/        # (models, repositories, controllers, screens, widgets)
 │   └── products/        # (models, repositories, controllers, screens, widgets)
 ├── routes/              # AppRouter (GoRouter), RouteNames
 └── main.dart            # ProviderScope entry point
